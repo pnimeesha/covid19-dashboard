@@ -1,0 +1,58 @@
+
+#Importing of required python modules and packages for plotting the graphs using data
+
+
+import pandas as pd
+import subprocess
+import os
+import requests
+from bs4 import BeautifulSoup
+import json
+import git
+import plotly.express as px
+
+import numpy as np
+from datetime import datetime
+
+import missingno as msno
+
+#Importing the data using url below
+url = "https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/owid-covid-data.csv"
+
+d_f = pd.read_csv(url,sep=',') # pd.read_csv is used for reading the data from the url
+
+d_f['location']
+
+d_f.columns
+
+#Selection of country from the data set
+
+data_frame_GER=d_f['location']=='Germany'
+data_frame_AUS = d_f['location']=='Australia'
+data_frame_IND = d_f['location'] =='India'
+
+Selected_countries_data = data_frame_GER|data_frame_AUS|data_frame_IND
+df_of_selected_countries = d_f[Selected_countries_data]
+df_of_selected_countries
+
+#COVID-19 Infection_rate over polpulation size
+
+#Plotting of graph using plotly.line( ) function
+
+df_of_selected_countries['mean_of_total_infections'] = df_of_selected_countries['total_cases']/df_of_selected_countries['population']
+
+COVID_cases_over_population = px.line(df_of_selected_countries, x= "date", y= "mean_of_total_infections", color="location", title = 'COVID CASES')
+COVID_cases_over_population.show()
+
+
+# Vaccination Over Population size
+
+
+df_result = df_of_selected_countries['Total_Vaccination_Percentage']
+filter_in = df_of_selected_countries['Total_Vaccination_Percentage'].fillna(method = 'bfill')
+result = savgol_filter(np.array(filter_in), 5, 1)
+df_of_selected_countries['total_vaccination_mean_filtered'] = result
+vaccination_plot_1 = px.line(df_of_selected_countries, x="date", y= "total_vaccination_mean_filtered", color = "location", title = 'vaccination rate')
+vaccination_plot_1.show()
+
+
